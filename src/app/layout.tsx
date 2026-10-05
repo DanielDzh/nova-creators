@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Unbounded } from "next/font/google";
+import { siteConfig } from "@/config/site";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -14,25 +15,53 @@ const unbounded = Unbounded({
 });
 
 export const metadata: Metadata = {
-  title: "NOVA — AI-блогери з характером",
-  description:
-    "Цифрові креатори з власним стилем, стрічкою та голосом. Обирай блогера, гортай пости й продовжуй спілкування в Telegram.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.title,
+    template: `%s · ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: [...siteConfig.keywords],
+  category: "entertainment",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "NOVA — AI-блогери з характером",
-    description: "Блогери, яких не існує. Емоції — справжні.",
-    locale: "uk_UA",
     type: "website",
+    url: "/",
+    siteName: siteConfig.name,
+    title: siteConfig.title,
+    description: siteConfig.tagline,
+    locale: siteConfig.locale,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.tagline,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  appleWebApp: {
+    title: siteConfig.name,
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07070a",
+  themeColor: siteConfig.themeColor,
+  colorScheme: "dark",
   viewportFit: "cover",
 };
 
 const RootLayout = ({ children }: LayoutProps<"/">) => (
   <html
-    lang="uk"
+    lang={siteConfig.language}
     data-scroll-behavior="smooth"
     className={`${manrope.variable} ${unbounded.variable}`}
   >
