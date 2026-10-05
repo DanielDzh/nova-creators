@@ -3,27 +3,35 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { AnimatePresence } from "motion/react";
 import { creators, type Creator } from "@/data/creators";
-import { ProfileSheet, type ProfileTab } from "./profile-sheet";
+import type { ProfileTab } from "@/data/profile";
+import { ProfileSheet } from "./profile-sheet";
 
 type ProfileContextValue = {
   openProfile: (slug: string, tab?: ProfileTab) => void;
 };
 
+type ActiveProfile = {
+  creator: Creator;
+  tab: ProfileTab;
+};
+
 const ProfileContext = createContext<ProfileContextValue | null>(null);
 
-export function useProfile() {
+export const useProfile = () => {
   const context = useContext(ProfileContext);
   if (!context) throw new Error("useProfile must be used inside <ProfileProvider>");
   return context;
-}
+};
 
-export function ProfileProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState<{ creator: Creator; tab: ProfileTab } | null>(null);
+export const ProfileProvider = ({ children }: { children: ReactNode }) => {
+  const [active, setActive] = useState<ActiveProfile | null>(null);
 
   const openProfile = useCallback((slug: string, tab: ProfileTab = "feed") => {
     const creator = creators.find((item) => item.slug === slug);
     setActive(creator ? { creator, tab } : null);
   }, []);
+
+  const closeProfile = useCallback(() => setActive(null), []);
 
   return (
     <ProfileContext.Provider value={{ openProfile }}>
@@ -34,10 +42,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
             key={active.creator.slug}
             creator={active.creator}
             initialTab={active.tab}
-            onClose={() => setActive(null)}
+            onClose={closeProfile}
           />
         )}
       </AnimatePresence>
     </ProfileContext.Provider>
   );
-}
+};

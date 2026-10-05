@@ -3,67 +3,63 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { creators } from "@/data/creators";
+import { AVATAR_SIZE } from "@/config/images";
+import { LIVE_CHAT } from "@/config/interaction";
+import {
+  PRESS_SCALE,
+  TYPING_DOT_LIFT,
+  liveChatAvatarSwap,
+  liveChatMessageSwap,
+  liveChatReveal,
+  quickFade,
+} from "@/config/motion";
+import { liveChatMessages } from "@/data/hero";
 import { useProfile } from "./profile-provider";
-
-const TYPING_MS = 1600;
-const MESSAGE_MS = 3600;
-
-// Each creator "writes" their own greeting, one after another.
-const messages = creators.map((creator) => ({
-  creator,
-  text: creator.greeting[creator.greeting.length - 1],
-}));
+import { TypingDots } from "./typing-dots";
 
 type Phase = "typing" | "message";
 
-export function HeroLiveChat() {
+export const HeroLiveChat = () => {
   const { openProfile } = useProfile();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("typing");
-  const { creator, text } = messages[index];
+  const { creator, text } = liveChatMessages[index];
 
   useEffect(() => {
+    const advance = () => {
+      if (phase === "typing") {
+        setPhase("message");
+        return;
+      }
+      setIndex((current) => (current + 1) % liveChatMessages.length);
+      setPhase("typing");
+    };
     const timer = setTimeout(
-      () => {
-        if (phase === "typing") {
-          setPhase("message");
-        } else {
-          setIndex((current) => (current + 1) % messages.length);
-          setPhase("typing");
-        }
-      },
-      phase === "typing" ? TYPING_MS : MESSAGE_MS,
+      advance,
+      phase === "typing" ? LIVE_CHAT.typingMs : LIVE_CHAT.messageMs,
     );
     return () => clearTimeout(timer);
   }, [phase]);
 
+  const handleClick = () => openProfile(creator.slug, "chat");
+
   return (
     <motion.button
       type="button"
-      onClick={() => openProfile(creator.slug, "chat")}
+      onClick={handleClick}
       aria-label={`Написати: ${creator.name}`}
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      whileTap={{ scale: 0.97 }}
+      {...liveChatReveal}
+      whileTap={PRESS_SCALE}
       className="border-line bg-surface/75 absolute inset-x-4 bottom-6 z-10 flex min-h-[76px] items-center gap-3 rounded-2xl border p-3 text-left shadow-2xl shadow-black/50 backdrop-blur-xl sm:inset-x-6"
     >
       <span className="relative shrink-0">
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.span
-            key={creator.slug}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.3 }}
-            className="block"
-          >
+          <motion.span key={creator.slug} {...liveChatAvatarSwap} className="block">
             <Image
               src={creator.avatar}
               alt=""
-              width={44}
-              height={44}
+              width={AVATAR_SIZE.liveChat}
+              height={AVATAR_SIZE.liveChat}
               className="size-11 rounded-full object-cover"
             />
           </motion.span>
@@ -80,31 +76,21 @@ export function HeroLiveChat() {
           {phase === "typing" ? (
             <motion.span
               key={`${creator.slug}-typing`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              {...quickFade}
               className="text-muted mt-1 flex items-center gap-1.5 text-sm"
             >
               друкує
               <span className="flex gap-0.5">
-                {[0, 1, 2].map((dot) => (
-                  <motion.span
-                    key={dot}
-                    className="size-1 rounded-full bg-white/60"
-                    animate={{ y: [0, -3, 0] }}
-                    transition={{ duration: 0.8, repeat: Infinity, delay: dot * 0.15 }}
-                  />
-                ))}
+                <TypingDots
+                  lift={TYPING_DOT_LIFT.liveChat}
+                  className="size-1 rounded-full bg-white/60"
+                />
               </span>
             </motion.span>
           ) : (
             <motion.span
               key={`${creator.slug}-message`}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.3 }}
+              {...liveChatMessageSwap}
               className="mt-0.5 line-clamp-2 block text-sm leading-snug text-white/90"
             >
               {text}
@@ -114,4 +100,4 @@ export function HeroLiveChat() {
       </span>
     </motion.button>
   );
-}
+};

@@ -30,14 +30,14 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
-  return (
-    <html
-      lang="uk"
-      data-scroll-behavior="smooth"
-      className={`${manrope.variable} ${unbounded.variable}`}
-    >
-      <body className="grain">{children}</body>
-    </html>
-  );
-}
+const RootLayout = ({ children }: LayoutProps<"/">) => (
+  <html
+    lang="uk"
+    data-scroll-behavior="smooth"
+    className={`${manrope.variable} ${unbounded.variable}`}
+  >
+    <body className="grain">{children}</body>
+  </html>
+);
+
+export default RootLayout;

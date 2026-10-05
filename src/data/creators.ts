@@ -12,8 +12,6 @@ import olesiaAvatar from "@/assets/creators/olesia/avatar.jpg";
 import olesiaPost1 from "@/assets/creators/olesia/post-1.jpg";
 import olesiaPost2 from "@/assets/creators/olesia/post-2.jpg";
 
-export const TELEGRAM_URL = "https://t.me/danone_dz";
-
 export type Post = {
   image: StaticImageData;
   caption: string;

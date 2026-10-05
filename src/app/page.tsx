@@ -7,18 +7,18 @@ import { SiteHeader } from "@/components/site-header";
 import { StickyTelegramBar } from "@/components/sticky-telegram-bar";
 import { TelegramCta } from "@/components/telegram-cta";
 
-export default function Home() {
-  return (
-    <ProfileProvider>
-      <SiteHeader />
-      <main>
-        <HeroSection />
-        <CreatorsSection />
-        <HowItWorks />
-        <TelegramCta />
-      </main>
-      <SiteFooter />
-      <StickyTelegramBar />
-    </ProfileProvider>
-  );
-}
+const Home = () => (
+  <ProfileProvider>
+    <SiteHeader />
+    <main>
+      <HeroSection />
+      <CreatorsSection />
+      <HowItWorks />
+      <TelegramCta />
+    </main>
+    <SiteFooter />
+    <StickyTelegramBar />
+  </ProfileProvider>
+);
+
+export default Home;
