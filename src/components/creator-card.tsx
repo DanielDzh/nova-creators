@@ -48,18 +48,16 @@ export function CreatorCard({ creator, onOpen }: CreatorCardProps) {
 
         <span className="absolute inset-x-0 bottom-0 p-5">
           <span className="font-display block text-xl font-bold">{creator.name}</span>
-          <span className="mt-0.5 block text-sm text-white/60">@{creator.handle}</span>
+          <span className="mt-0.5 block text-sm text-white/60">
+            @{creator.handle} ·{" "}
+            <span className="font-semibold text-white">{creator.followers}</span> підписників
+          </span>
           <span className="mt-3 line-clamp-2 block text-sm leading-snug text-white/85">
             {creator.tagline}
           </span>
-          <span className="mt-4 flex items-center justify-between gap-3">
-            <span className="text-xs text-white/60">
-              <span className="font-semibold text-white">{creator.followers}</span> підписників
-            </span>
-            <span className="text-ink inline-flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold transition-colors group-hover:bg-(--accent)">
-              Дивитись блог
-              <ArrowIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </span>
+          <span className="text-ink mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white text-sm font-semibold transition-colors group-hover:bg-(--accent)">
+            Дивитись блог
+            <ArrowIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
           </span>
         </span>
       </button>
