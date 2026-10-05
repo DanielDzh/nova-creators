@@ -109,9 +109,7 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
         </button>
 
         <div className="no-scrollbar flex-1 overflow-y-auto overscroll-contain">
-          <div className="relative h-32 bg-[radial-gradient(120%_120%_at_50%_0%,var(--accent),transparent_70%)] opacity-60" />
-
-          <div className="-mt-16 px-5 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+          <div className="px-5 pt-12 pb-[calc(2rem+env(safe-area-inset-bottom))]">
             <button
               type="button"
               onClick={() => setStoryIndex(0)}
