@@ -2,32 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { STICKY_TELEGRAM_BAR } from "@/config/interaction";
+import { stickyBarSlide } from "@/config/motion";
 import { TelegramButton } from "./telegram-button";
 
-const SHOW_AFTER_PX = 640;
+const isBarVisible = () => {
+  const { scrollY, innerHeight } = window;
+  const pageHeight = document.documentElement.scrollHeight;
+  const nearBottom = innerHeight + scrollY > pageHeight - STICKY_TELEGRAM_BAR.hideNearBottomPx;
+  return scrollY > STICKY_TELEGRAM_BAR.showAfterPx && !nearBottom;
+};
 
-export function StickyTelegramBar() {
+export const StickyTelegramBar = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const nearBottom =
-        window.innerHeight + window.scrollY > document.documentElement.scrollHeight - 480;
-      setVisible(window.scrollY > SHOW_AFTER_PX && !nearBottom);
-    };
-    handleScroll();
+    const handleScroll = () => setVisible(isBarVisible());
+    const frame = requestAnimationFrame(handleScroll);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          {...stickyBarSlide}
           className="from-ink via-ink/90 fixed inset-x-0 bottom-0 z-30 bg-linear-to-t to-transparent px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
         >
           <TelegramButton className="w-full" />
@@ -35,4 +38,4 @@ export function StickyTelegramBar() {
       )}
     </AnimatePresence>
   );
-}
+};

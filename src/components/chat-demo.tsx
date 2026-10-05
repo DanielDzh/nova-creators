@@ -3,8 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
+import { AVATAR_SIZE } from "@/config/images";
+import { CHAT_DEMO } from "@/config/interaction";
+import { TYPING_DOT_LIFT, chatMessagePop, softFadeUp } from "@/config/motion";
 import type { Creator } from "@/data/creators";
+import { firstName, typingDelay } from "@/lib/chat";
+import { QuickReplyButton } from "./quick-reply-button";
 import { TelegramButton } from "./telegram-button";
+import { TypingDots } from "./typing-dots";
 
 type Message = {
   id: number;
@@ -12,11 +18,11 @@ type Message = {
   text: string;
 };
 
-const PAUSE_BEFORE_TYPING_MS = 350;
+type ChatDemoProps = {
+  creator: Creator;
+};
 
-const typingDelay = (text: string) => Math.min(700 + text.length * 18, 2000);
-
-export function ChatDemo({ creator }: { creator: Creator }) {
+export const ChatDemo = ({ creator }: ChatDemoProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [pending, setPending] = useState<string[]>(creator.greeting);
   const [typing, setTyping] = useState(false);
@@ -35,15 +41,15 @@ export function ChatDemo({ creator }: { creator: Creator }) {
     const [line] = pending;
     if (line === undefined) return;
 
-    const typingTimer = setTimeout(() => setTyping(true), PAUSE_BEFORE_TYPING_MS);
-    const messageTimer = setTimeout(
-      () => {
-        setTyping(false);
-        push("creator", line);
-        setPending((queue) => queue.slice(1));
-      },
-      PAUSE_BEFORE_TYPING_MS + typingDelay(line),
-    );
+    const startTyping = () => setTyping(true);
+    const deliver = () => {
+      setTyping(false);
+      push("creator", line);
+      setPending((queue) => queue.slice(1));
+    };
+
+    const typingTimer = setTimeout(startTyping, CHAT_DEMO.pauseBeforeTypingMs);
+    const messageTimer = setTimeout(deliver, CHAT_DEMO.pauseBeforeTypingMs + typingDelay(line));
 
     return () => {
       clearTimeout(typingTimer);
@@ -80,17 +86,15 @@ export function ChatDemo({ creator }: { creator: Creator }) {
             <motion.li
               key={message.id}
               layout
-              initial={{ opacity: 0, y: 12, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              {...chatMessagePop}
               className={`flex items-end gap-2 ${message.from === "user" ? "justify-end" : ""}`}
             >
               {message.from === "creator" && (
                 <Image
                   src={creator.avatar}
                   alt=""
-                  width={28}
-                  height={28}
+                  width={AVATAR_SIZE.chat}
+                  height={AVATAR_SIZE.chat}
                   className="size-7 shrink-0 rounded-full object-cover"
                 />
               )}
@@ -112,20 +116,16 @@ export function ChatDemo({ creator }: { creator: Creator }) {
             <Image
               src={creator.avatar}
               alt=""
-              width={28}
-              height={28}
+              width={AVATAR_SIZE.chat}
+              height={AVATAR_SIZE.chat}
               className="size-7 shrink-0 rounded-full object-cover"
             />
             <span className="bg-surface-2 flex gap-1 rounded-2xl rounded-bl-md px-4 py-3.5">
               <span className="sr-only">{creator.name} друкує…</span>
-              {[0, 1, 2].map((dot) => (
-                <motion.span
-                  key={dot}
-                  className="size-1.5 rounded-full bg-white/60"
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: dot * 0.15 }}
-                />
-              ))}
+              <TypingDots
+                lift={TYPING_DOT_LIFT.chat}
+                className="size-1.5 rounded-full bg-white/60"
+              />
             </span>
           </li>
         )}
@@ -136,32 +136,29 @@ export function ChatDemo({ creator }: { creator: Creator }) {
       <div className="mt-auto pt-4">
         {finished ? (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+            {...softFadeUp}
             className="border-line rounded-2xl border bg-white/[0.03] p-4 text-center"
           >
             <p className="text-sm text-white/85">
-              Сподобалось? {creator.name.split(" ")[0]} продовжить розмову в Telegram — з
-              ексклюзивними фото й особистими відповідями.
+              Сподобалось? {firstName(creator.name)} продовжить розмову в Telegram — з ексклюзивними
+              фото й особистими відповідями.
             </p>
             <TelegramButton label="Продовжити в Telegram" className="mt-4 w-full" />
           </motion.div>
         ) : (
           <div className="flex flex-wrap gap-2">
             {remaining.map((quickReply) => (
-              <button
+              <QuickReplyButton
                 key={quickReply.index}
-                type="button"
+                index={quickReply.index}
+                question={quickReply.question}
                 disabled={busy}
-                onClick={() => ask(quickReply.index)}
-                className="border-line rounded-full border bg-white/5 px-3.5 py-2 text-left text-[13px] text-white/90 transition-colors hover:border-(--accent) disabled:opacity-40"
-              >
-                {quickReply.question}
-              </button>
+                onAsk={ask}
+              />
             ))}
           </div>
         )}
       </div>
     </div>
   );
-}
+};

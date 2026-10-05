@@ -1,31 +1,35 @@
 "use client";
 
-import type { CSSProperties, Ref } from "react";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { IMAGE_SIZES } from "@/config/images";
+import { cardVariants } from "@/config/motion";
 import type { Creator } from "@/data/creators";
 import { ArrowIcon, UsersIcon } from "./icons";
 
 type CreatorCardProps = {
   creator: Creator;
-  onOpen: () => void;
-  ref?: Ref<HTMLButtonElement>;
+  index: number;
+  onOpen: (slug: string) => void;
+  /** Hands the card element to the carousel for its coverflow styles. */
+  onRegister: (index: number, node: HTMLButtonElement | null) => void;
 };
 
-export function CreatorCard({ creator, onOpen, ref }: CreatorCardProps) {
+export const CreatorCard = ({ creator, index, onOpen, onRegister }: CreatorCardProps) => {
+  const handleClick = () => onOpen(creator.slug);
+  const handleRef = (node: HTMLButtonElement | null) => onRegister(index, node);
+
   return (
     <motion.article
-      variants={{
-        hidden: { opacity: 0, y: 40 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-      }}
+      variants={cardVariants}
       className="group relative w-[72vw] max-w-[300px] shrink-0 snap-center sm:w-auto sm:max-w-none"
       style={{ "--accent": creator.accent } as CSSProperties}
     >
       <button
-        ref={ref}
+        ref={handleRef}
         type="button"
-        onClick={onOpen}
+        onClick={handleClick}
         className="border-line relative block aspect-[3/4] w-full overflow-hidden rounded-[28px] border text-left transition-[box-shadow,scale] duration-500 group-hover:shadow-[0_24px_60px_-20px_var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.97] active:duration-150"
         aria-label={`Відкрити профіль: ${creator.name}`}
       >
@@ -33,7 +37,7 @@ export function CreatorCard({ creator, onOpen, ref }: CreatorCardProps) {
           src={creator.avatar}
           alt={`${creator.name} — ${creator.niche}`}
           fill
-          sizes="(min-width: 1024px) 270px, (min-width: 640px) 45vw, 72vw"
+          sizes={IMAGE_SIZES.catalogCard}
           placeholder="blur"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
@@ -68,4 +72,4 @@ export function CreatorCard({ creator, onOpen, ref }: CreatorCardProps) {
       </button>
     </motion.article>
   );
-}
+};

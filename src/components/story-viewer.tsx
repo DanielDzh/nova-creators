@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, type PanInfo } from "motion/react";
+import { AVATAR_SIZE, IMAGE_SIZES } from "@/config/images";
+import { DRAG_DOWN_ONLY, STORIES, SWIPE_CLOSE } from "@/config/interaction";
+import { LIKE_PRESS_SCALE, heartBurst, storyImageFade, storyViewerPop } from "@/config/motion";
 import type { Creator } from "@/data/creators";
 import { formatCount } from "@/lib/format";
+import { isSwipeClose } from "@/lib/gestures";
 import { CloseIcon, HeartIcon, PinIcon } from "./icons";
+import { StoryProgress } from "./story-progress";
 import { TelegramButton } from "./telegram-button";
-
-const STORY_DURATION_MS = 5000;
-const DOUBLE_TAP_MS = 260;
 
 type StoryViewerProps = {
   creator: Creator;
@@ -17,11 +19,18 @@ type StoryViewerProps = {
   onClose: () => void;
 };
 
-export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) {
+type Direction = "prev" | "next";
+
+/** `detail === 0` means the click came from the keyboard, not a pointer. */
+const isKeyboardClick = (event: MouseEvent) => event.detail === 0;
+
+export const StoryViewer = ({ creator, startIndex, onClose }: StoryViewerProps) => {
   const [index, setIndex] = useState(startIndex);
   const [paused, setPaused] = useState(false);
   const [liked, setLiked] = useState<Set<number>>(() => new Set());
   const [burstKey, setBurstKey] = useState(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draggedRef = useRef(false);
 
   const post = creator.posts[index];
   const isLiked = liked.has(index);
@@ -44,48 +53,58 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
     return () => window.removeEventListener("keydown", handleKey);
   }, [next, prev, onClose]);
 
+  useEffect(() => () => clearTimeout(tapTimerRef.current ?? undefined), []);
+
+  const showBurst = () => setBurstKey((key) => key + 1);
+
   const toggleLike = () => {
     const updated = new Set(liked);
-    if (isLiked) updated.delete(index);
-    else {
+    if (isLiked) {
+      updated.delete(index);
+    } else {
       updated.add(index);
-      setBurstKey((key) => key + 1);
-      navigator.vibrate?.(12);
+      showBurst();
+      navigator.vibrate?.(STORIES.likeVibrationMs);
     }
     setLiked(updated);
   };
 
   // Double tap likes (like in Instagram); a single tap navigates after a short wait.
-  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const draggedRef = useRef(false);
-
-  useEffect(() => () => clearTimeout(tapTimerRef.current ?? undefined), []);
-
-  const handleTap = (direction: "prev" | "next", event: MouseEvent) => {
+  const handleTap = (direction: Direction, event: MouseEvent) => {
     if (draggedRef.current) return;
     const navigate = direction === "next" ? next : prev;
-    // Keyboard activation (detail === 0) navigates straight away.
-    if (event.detail === 0) return navigate();
+    if (isKeyboardClick(event)) return navigate();
 
     if (tapTimerRef.current) {
       clearTimeout(tapTimerRef.current);
       tapTimerRef.current = null;
-      if (!isLiked) toggleLike();
-      else setBurstKey((key) => key + 1);
+      if (isLiked) showBurst();
+      else toggleLike();
       return;
     }
-    tapTimerRef.current = setTimeout(() => {
+    const navigateLater = () => {
       tapTimerRef.current = null;
       navigate();
-    }, DOUBLE_TAP_MS);
+    };
+    tapTimerRef.current = setTimeout(navigateLater, STORIES.doubleTapMs);
+  };
+
+  const handlePrevTap = (event: MouseEvent) => handleTap("prev", event);
+  const handleNextTap = (event: MouseEvent) => handleTap("next", event);
+  const handlePause = () => setPaused(true);
+  const handleResume = () => setPaused(false);
+
+  const handleDragStart = () => {
+    draggedRef.current = true;
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.y > 120 || info.velocity.y > 600) onClose();
+    if (isSwipeClose(info, SWIPE_CLOSE)) onClose();
     // Let the click that follows a drag pass without navigating.
-    setTimeout(() => {
+    const resetDragged = () => {
       draggedRef.current = false;
-    }, 0);
+    };
+    setTimeout(resetDragged);
   };
 
   return (
@@ -93,36 +112,24 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
       role="dialog"
       aria-modal="true"
       aria-label={`Сторіз ${creator.name}`}
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.25 }}
+      {...storyViewerPop}
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black md:bg-black/90 md:backdrop-blur-lg"
     >
       <motion.div
         drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.8 }}
-        onDragStart={() => {
-          draggedRef.current = true;
-        }}
+        dragConstraints={DRAG_DOWN_ONLY}
+        dragElastic={STORIES.dragElastic}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         className="relative h-dvh w-full overflow-hidden md:h-[min(860px,94dvh)] md:max-w-[440px] md:rounded-[28px]"
       >
         <AnimatePresence initial={false}>
-          <motion.div
-            key={post.image.src}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0"
-          >
+          <motion.div key={post.image.src} {...storyImageFade} className="absolute inset-0">
             <Image
               src={post.image}
               alt={post.caption}
               fill
-              sizes="(min-width: 768px) 440px, 100vw"
+              sizes={IMAGE_SIZES.story}
               placeholder="blur"
               className="object-cover"
               priority
@@ -132,37 +139,19 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
         <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80" />
 
         <div className="absolute inset-x-0 top-0 z-10 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-          <div className="flex gap-1">
-            {creator.posts.map((item, itemIndex) => (
-              <div
-                key={item.image.src}
-                className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/30"
-              >
-                <div
-                  key={`${itemIndex}-${index}`}
-                  className="h-full bg-white"
-                  style={
-                    itemIndex < index
-                      ? { width: "100%" }
-                      : itemIndex > index
-                        ? { width: "0%" }
-                        : {
-                            animation: `story-progress ${STORY_DURATION_MS}ms linear forwards`,
-                            animationPlayState: paused ? "paused" : "running",
-                          }
-                  }
-                  onAnimationEnd={itemIndex === index ? next : undefined}
-                />
-              </div>
-            ))}
-          </div>
+          <StoryProgress
+            posts={creator.posts}
+            activeIndex={index}
+            paused={paused}
+            onComplete={next}
+          />
 
           <div className="mt-3 flex items-center gap-3">
             <Image
               src={creator.avatar}
               alt=""
-              width={36}
-              height={36}
+              width={AVATAR_SIZE.story}
+              height={AVATAR_SIZE.story}
               className="size-9 rounded-full border border-white/40 object-cover"
             />
             <div className="min-w-0 flex-1 text-sm">
@@ -187,31 +176,19 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
 
         <div
           className="absolute inset-0 flex"
-          onPointerDown={() => setPaused(true)}
-          onPointerUp={() => setPaused(false)}
-          onPointerLeave={() => setPaused(false)}
+          onPointerDown={handlePause}
+          onPointerUp={handleResume}
+          onPointerLeave={handleResume}
         >
-          <button
-            type="button"
-            aria-label="Попередня"
-            className="w-1/3"
-            onClick={(event) => handleTap("prev", event)}
-          />
-          <button
-            type="button"
-            aria-label="Наступна"
-            className="flex-1"
-            onClick={(event) => handleTap("next", event)}
-          />
+          <button type="button" aria-label="Попередня" className="w-1/3" onClick={handlePrevTap} />
+          <button type="button" aria-label="Наступна" className="flex-1" onClick={handleNextTap} />
         </div>
 
         <AnimatePresence>
           {burstKey > 0 && (
             <motion.div
               key={burstKey}
-              initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: [0.4, 1.2, 1], opacity: [0, 1, 0] }}
-              transition={{ duration: 0.8 }}
+              {...heartBurst}
               className="pointer-events-none absolute inset-0 grid place-items-center"
             >
               <HeartIcon filled className="size-28 text-white drop-shadow-2xl" />
@@ -229,7 +206,7 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
               aria-label="Вподобати"
               className="flex flex-col items-center gap-0.5 text-xs font-semibold"
             >
-              <motion.span whileTap={{ scale: 0.8 }} className="grid size-11 place-items-center">
+              <motion.span whileTap={LIKE_PRESS_SCALE} className="grid size-11 place-items-center">
                 <HeartIcon
                   filled={isLiked}
                   className={`size-7 transition-colors ${isLiked ? "text-rose-500" : "text-white"}`}
@@ -243,4 +220,4 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
       </motion.div>
     </motion.div>
   );
-}
+};

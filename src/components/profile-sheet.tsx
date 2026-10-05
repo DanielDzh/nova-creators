@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useDragControls, type PanInfo } from "motion/react";
+import { AVATAR_SIZE } from "@/config/images";
+import { DRAG_DOWN_ONLY, PROFILE_SHEET, SWIPE_CLOSE } from "@/config/interaction";
+import { chatPanel, feedPanel, overlayFade, sheetSlide } from "@/config/motion";
 import type { Creator } from "@/data/creators";
-import { formatCount } from "@/lib/format";
+import { getProfileStats, profileTabs, type ProfileTab } from "@/data/profile";
+import { isSwipeClose } from "@/lib/gestures";
 import { ChatDemo } from "./chat-demo";
-import { CloseIcon, HeartIcon, SparkIcon } from "./icons";
+import { FeedPost } from "./feed-post";
+import { CloseIcon, SparkIcon } from "./icons";
+import { ProfileTabButton } from "./profile-tab-button";
 import { StoryViewer } from "./story-viewer";
 import { TelegramButton } from "./telegram-button";
-
-export type ProfileTab = "feed" | "chat";
 
 type ProfileSheetProps = {
   creator: Creator;
@@ -18,24 +22,19 @@ type ProfileSheetProps = {
   onClose: () => void;
 };
 
-const tabs: { id: ProfileTab; label: string }[] = [
-  { id: "feed", label: "Стрічка" },
-  { id: "chat", label: "Чат" },
-];
-
-export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileSheetProps) {
+export const ProfileSheet = ({ creator, initialTab = "feed", onClose }: ProfileSheetProps) => {
   const [tab, setTab] = useState<ProfileTab>(initialTab);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
   const dragControls = useDragControls();
   const tabsRef = useRef<HTMLDivElement>(null);
+  const stats = getProfileStats(creator);
 
   // Opened straight into the chat: bring the tabs into view once the sheet has slid in.
   useEffect(() => {
     if (initialTab !== "chat") return;
-    const timer = setTimeout(
-      () => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      450,
-    );
+    const scrollToTabs = () =>
+      tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const timer = setTimeout(scrollToTabs, PROFILE_SHEET.chatScrollDelayMs);
     return () => clearTimeout(timer);
   }, [initialTab]);
 
@@ -57,23 +56,20 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
   }, [onClose, storyIndex]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.y > 120 || info.velocity.y > 600) onClose();
+    if (isSwipeClose(info, SWIPE_CLOSE)) onClose();
   };
 
-  const stats = [
-    { value: creator.followers, label: "підписників" },
-    { value: String(creator.postsCount), label: "публікацій" },
-    { value: creator.responseTime, label: "відповідь" },
-  ];
+  const handleHandlePointerDown = (event: PointerEvent<HTMLDivElement>) =>
+    dragControls.start(event);
+  const handleOpenStories = () => setStoryIndex(0);
+  const handleCloseStories = () => setStoryIndex(null);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6">
       <motion.div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0, transition: { duration: 0.25 } }}
+        {...overlayFade}
         onClick={onClose}
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
       />
 
       <motion.div
@@ -83,19 +79,15 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
         drag="y"
         dragControls={dragControls}
         dragListener={false}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.7 }}
+        dragConstraints={DRAG_DOWN_ONLY}
+        dragElastic={PROFILE_SHEET.dragElastic}
         onDragEnd={handleDragEnd}
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        // Closing uses a short tween: a spring's long settle tail made the sheet linger at the bottom.
-        exit={{ y: "100%", transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] } }}
-        transition={{ type: "spring", stiffness: 320, damping: 34 }}
+        {...sheetSlide}
         style={{ "--accent": creator.accent } as CSSProperties}
         className="border-line bg-surface relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] border md:h-[min(780px,90dvh)] md:max-w-[460px] md:rounded-[32px]"
       >
         <div
-          onPointerDown={(event) => dragControls.start(event)}
+          onPointerDown={handleHandlePointerDown}
           className="absolute inset-x-0 top-0 z-10 flex h-10 cursor-grab touch-none justify-center pt-3 active:cursor-grabbing"
         >
           <span className="h-1.5 w-12 rounded-full bg-white/30" />
@@ -113,7 +105,7 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
           <div className="px-5 pt-12 pb-[calc(2rem+env(safe-area-inset-bottom))]">
             <button
               type="button"
-              onClick={() => setStoryIndex(0)}
+              onClick={handleOpenStories}
               aria-label="Дивитись сторіз"
               className="relative mx-auto block size-28 rounded-full bg-[conic-gradient(from_180deg,var(--accent),#ffffff,var(--accent))] p-[3px] transition-transform active:scale-95"
             >
@@ -121,8 +113,8 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
                 <Image
                   src={creator.avatar}
                   alt={creator.name}
-                  width={112}
-                  height={112}
+                  width={AVATAR_SIZE.profile}
+                  height={AVATAR_SIZE.profile}
                   className="size-full object-cover"
                 />
               </span>
@@ -168,71 +160,32 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
               className="bg-surface/90 sticky top-0 z-[5] -mx-5 mt-8 px-5 backdrop-blur-md"
             >
               <div className="border-line flex border-b" role="tablist">
-                {tabs.map((item) => (
-                  <button
+                {profileTabs.map((item) => (
+                  <ProfileTabButton
                     key={item.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={tab === item.id}
-                    onClick={() => setTab(item.id)}
-                    className={`relative flex-1 py-3.5 text-sm font-semibold transition-colors ${
-                      tab === item.id ? "text-white" : "text-muted"
-                    }`}
-                  >
-                    {item.label}
-                    {tab === item.id && (
-                      <motion.span
-                        layoutId="profile-tab"
-                        className="absolute inset-x-6 -bottom-px h-0.5 rounded-full bg-(--accent)"
-                      />
-                    )}
-                  </button>
+                    id={item.id}
+                    label={item.label}
+                    active={tab === item.id}
+                    onSelect={setTab}
+                  />
                 ))}
               </div>
             </div>
 
             <AnimatePresence mode="wait" initial={false}>
               {tab === "feed" ? (
-                <motion.ul
-                  key="feed"
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.2 }}
-                  className="mt-4 grid grid-cols-2 gap-2"
-                >
+                <motion.ul key="feed" {...feedPanel} className="mt-4 grid grid-cols-2 gap-2">
                   {creator.posts.map((post, index) => (
-                    <li key={post.image.src}>
-                      <button
-                        type="button"
-                        onClick={() => setStoryIndex(index)}
-                        className="group relative block aspect-[3/4] w-full overflow-hidden rounded-2xl"
-                        aria-label={`Відкрити пост: ${post.caption}`}
-                      >
-                        <Image
-                          src={post.image}
-                          alt={post.caption}
-                          fill
-                          sizes="(min-width: 768px) 210px, 46vw"
-                          placeholder="blur"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <span className="absolute inset-x-0 bottom-0 flex items-center gap-1 bg-linear-to-t from-black/70 to-transparent p-2.5 pt-8 text-xs font-semibold">
-                          <HeartIcon filled className="size-3.5" />
-                          {formatCount(post.likes)}
-                        </span>
-                      </button>
-                    </li>
+                    <FeedPost
+                      key={post.image.src}
+                      post={post}
+                      index={index}
+                      onOpen={setStoryIndex}
+                    />
                   ))}
                 </motion.ul>
               ) : (
-                <motion.div
-                  key="chat"
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 16 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div key="chat" {...chatPanel}>
                   <ChatDemo creator={creator} />
                 </motion.div>
               )}
@@ -243,13 +196,9 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
 
       <AnimatePresence>
         {storyIndex !== null && (
-          <StoryViewer
-            creator={creator}
-            startIndex={storyIndex}
-            onClose={() => setStoryIndex(null)}
-          />
+          <StoryViewer creator={creator} startIndex={storyIndex} onClose={handleCloseStories} />
         )}
       </AnimatePresence>
     </div>
   );
-}
+};
