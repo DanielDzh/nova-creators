@@ -72,7 +72,7 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        exit={{ opacity: 0, transition: { duration: 0.25 } }}
         onClick={onClose}
       />
 
@@ -88,7 +88,8 @@ export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileS
         onDragEnd={handleDragEnd}
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        exit={{ y: "100%" }}
+        // Closing uses a short tween: a spring's long settle tail made the sheet linger at the bottom.
+        exit={{ y: "100%", transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] } }}
         transition={{ type: "spring", stiffness: 320, damping: 34 }}
         style={{ "--accent": creator.accent } as CSSProperties}
         className="border-line bg-surface relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] border md:h-[min(780px,90dvh)] md:max-w-[460px] md:rounded-[32px]"
