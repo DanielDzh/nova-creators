@@ -13,6 +13,16 @@
   --font-display: var(--font-unbounded), ui-sans-serif, system-ui, sans-serif;
 
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-marquee-up: marquee-up 60s linear infinite;
+
+  @keyframes marquee-up {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-50%);
+    }
+  }
 
   @keyframes pulse-dot {
     0%,

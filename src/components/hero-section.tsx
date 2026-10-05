@@ -3,20 +3,11 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { creators } from "@/data/creators";
+import { HeroMarquee } from "./hero-marquee";
 import { ArrowIcon } from "./icons";
-import { useProfile } from "./profile-provider";
 import { TelegramButton } from "./telegram-button";
 
-const fan = [
-  { left: "0%", rotate: -9, y: 22, z: 1 },
-  { left: "19%", rotate: -3, y: 4, z: 3 },
-  { left: "39%", rotate: 3, y: 10, z: 2 },
-  { left: "58%", rotate: 9, y: 28, z: 0 },
-];
-
 export function HeroSection() {
-  const { openProfile } = useProfile();
-
   return (
     <section id="top" className="relative overflow-hidden pt-28 pb-16 sm:pt-36 md:pb-24">
       <div
@@ -83,45 +74,7 @@ export function HeroSection() {
           </div>
         </motion.div>
 
-        <div className="relative mx-auto aspect-[3/2] w-full max-w-[460px]">
-          {creators.map((creator, index) => {
-            const pose = fan[index];
-            return (
-              <motion.button
-                key={creator.slug}
-                type="button"
-                onClick={() => openProfile(creator.slug)}
-                aria-label={`Відкрити профіль: ${creator.name}`}
-                initial={{ opacity: 0, y: 60, rotate: 0 }}
-                animate={{ opacity: 1, y: pose.y, rotate: pose.rotate }}
-                whileHover={{ y: pose.y - 16, scale: 1.04, zIndex: 10 }}
-                whileTap={{ scale: 0.97 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 140,
-                  damping: 18,
-                  delay: 0.2 + index * 0.08,
-                }}
-                style={{ zIndex: pose.z, left: pose.left }}
-                className="absolute top-0 aspect-[3/4] w-[42%] cursor-pointer overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/60"
-              >
-                <Image
-                  src={creator.avatar}
-                  alt={creator.name}
-                  fill
-                  sizes="(min-width: 768px) 200px, 42vw"
-                  placeholder="blur"
-                  className="object-cover"
-                  priority
-                />
-                <span className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 to-transparent p-3 pt-10 text-left">
-                  <span className="block text-xs font-semibold">@{creator.handle}</span>
-                  <span className="block text-[10px] text-white/70">{creator.niche}</span>
-                </span>
-              </motion.button>
-            );
-          })}
-        </div>
+        <HeroMarquee />
       </div>
     </section>
   );
