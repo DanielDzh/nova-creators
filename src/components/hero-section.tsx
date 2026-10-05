@@ -12,7 +12,7 @@ import { ArrowIcon } from "./icons";
 import { TelegramButton } from "./telegram-button";
 
 export const HeroSection = () => (
-  <section id="top" className="relative overflow-hidden pt-28 pb-16 sm:pt-36 md:pb-24">
+  <section id="top" className="relative overflow-hidden pt-32 pb-16 sm:pt-36 md:pb-24">
     <div
       aria-hidden="true"
       className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(124_196_255/0.18),transparent)] blur-2xl"
@@ -22,7 +22,7 @@ export const HeroSection = () => (
       className="pointer-events-none absolute top-60 -right-40 h-[420px] w-[420px] rounded-full bg-[radial-gradient(closest-side,rgb(255_122_138/0.14),transparent)] blur-2xl"
     />
 
-    <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 md:grid-cols-[1.1fr_1fr]">
+    <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-4 sm:px-6 md:grid-cols-[1.1fr_1fr]">
       <motion.div {...heroTextReveal}>
         <div className="border-line mb-6 inline-flex items-center gap-2 rounded-full border bg-white/5 py-1.5 pr-3.5 pl-2 text-xs text-white/80">
           <span className="animate-pulse-dot size-2 rounded-full bg-green-400" />4 AI-креатори зараз
