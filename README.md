@@ -60,12 +60,12 @@ src/
 │   └── chat-demo         # сценарний демо-діалог
 ├── data/creators.ts      # контент: персонажі, пости, сценарії чату
 └── lib/                  # утиліти
-public/bloggers/<slug>/   # avatar.jpg, post-1..4.jpg
+public/bloggers/<slug>/   # avatar.jpg, post-1.jpg, post-2.jpg
 ```
 
 ## Як додати креатора
 
-1. Поклади зображення в `public/bloggers/<slug>/`: `avatar.jpg` і `post-1.jpg` … `post-4.jpg` (пропорція 4:5).
+1. Поклади зображення в `public/bloggers/<slug>/`: `avatar.jpg`, `post-1.jpg` і `post-2.jpg` (пропорція 3:4).
 2. Додай об'єкт у масив `creators` у `src/data/creators.ts`: ім'я, нікнейм, тематику, акцентний колір, пости та сценарій чату.
 
 Решта інтерфейсу підхопить нового персонажа автоматично.

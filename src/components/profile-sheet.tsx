@@ -195,7 +195,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
                       <button
                         type="button"
                         onClick={() => setStoryIndex(index)}
-                        className="group relative block aspect-[4/5] w-full overflow-hidden rounded-2xl"
+                        className="group relative block aspect-[3/4] w-full overflow-hidden rounded-2xl"
                         aria-label={`Відкрити пост: ${post.caption}`}
                       >
                         <Image
