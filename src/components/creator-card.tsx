@@ -4,7 +4,7 @@ import type { CSSProperties, Ref } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import type { Creator } from "@/data/creators";
-import { ArrowIcon } from "./icons";
+import { ArrowIcon, UsersIcon } from "./icons";
 
 type CreatorCardProps = {
   creator: Creator;
@@ -37,25 +37,32 @@ export function CreatorCard({ creator, onOpen, ref }: CreatorCardProps) {
           placeholder="blur"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
-        <span className="absolute inset-x-0 bottom-0 h-2/5 bg-linear-to-t from-black/85 via-black/40 to-transparent" />
+        <span className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/90 via-black/45 to-transparent" />
 
         <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-black/35 px-3 py-1 text-xs font-medium backdrop-blur-md">
-          <span className="size-1.5 rounded-full bg-(--accent)" />
-          {creator.niche}
+          <span className="animate-pulse-dot size-1.5 rounded-full bg-green-400" />
+          онлайн
+        </span>
+        <span className="text-ink absolute top-3 right-3 grid size-10 place-items-center rounded-full bg-white transition-colors group-hover:bg-(--accent)">
+          <span className="sr-only">Дивитись блог</span>
+          <ArrowIcon className="size-5 -rotate-45 transition-transform duration-300 group-hover:rotate-0" />
         </span>
 
-        <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
-          <span className="min-w-0">
-            <span className="font-display flex items-center gap-2 text-lg leading-tight font-bold">
-              <span className="truncate">{creator.name}</span>
-              <span className="animate-pulse-dot size-2 shrink-0 rounded-full bg-green-400" />
-              <span className="sr-only">онлайн</span>
-            </span>
-            <span className="mt-0.5 block truncate text-sm text-white/70">@{creator.handle}</span>
+        <span className="absolute inset-x-0 bottom-0 p-4">
+          <span className="font-display block text-xl leading-tight font-bold text-balance">
+            {creator.name}
           </span>
-          <span className="text-ink grid size-11 shrink-0 place-items-center rounded-full bg-white transition-colors group-hover:bg-(--accent)">
-            <span className="sr-only">Дивитись блог</span>
-            <ArrowIcon className="size-5 -rotate-45 transition-transform duration-300 group-hover:rotate-0" />
+          <span className="mt-1.5 flex items-center gap-2 text-sm whitespace-nowrap text-white/75">
+            <span className="inline-flex items-center gap-1.5 font-medium text-white">
+              <span className="size-1.5 rounded-full bg-(--accent)" />
+              {creator.niche}
+            </span>
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex items-center gap-1">
+              <UsersIcon className="size-3.5" />
+              {creator.followers}
+              <span className="sr-only"> підписників</span>
+            </span>
           </span>
         </span>
       </button>
