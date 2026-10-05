@@ -47,6 +47,7 @@
 @layer base {
   html {
     color-scheme: dark;
+    scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -86,6 +87,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
