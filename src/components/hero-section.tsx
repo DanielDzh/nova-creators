@@ -1,23 +1,42 @@
 "use client";
 
+import type { PointerEvent } from "react";
 import Image from "next/image";
-import { motion } from "motion/react";
+import { motion, useMotionValue, useReducedMotion } from "motion/react";
 import { creators } from "@/data/creators";
+import { HeroGlow } from "./hero-glow";
 import { HeroMarquee } from "./hero-marquee";
 import { ArrowIcon } from "./icons";
 import { TelegramButton } from "./telegram-button";
 
+// Resting point of the glow, relative to the section's top centre.
+const GLOW_REST_Y = 120;
+
 export function HeroSection() {
+  const reduceMotion = useReducedMotion();
+  const glowX = useMotionValue(0);
+  const glowY = useMotionValue(0);
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (reduceMotion || event.pointerType !== "mouse") return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    glowX.set(event.clientX - rect.left - rect.width / 2);
+    glowY.set(event.clientY - rect.top - GLOW_REST_Y);
+  };
+
+  const handlePointerLeave = () => {
+    glowX.set(0);
+    glowY.set(0);
+  };
+
   return (
-    <section id="top" className="relative overflow-hidden pt-28 pb-16 sm:pt-36 md:pb-24">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(124_196_255/0.18),transparent)] blur-2xl"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-60 -right-40 h-[420px] w-[420px] rounded-full bg-[radial-gradient(closest-side,rgb(255_122_138/0.14),transparent)] blur-2xl"
-      />
+    <section
+      id="top"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      className="relative overflow-hidden pt-28 pb-16 sm:pt-36 md:pb-24"
+    >
+      <HeroGlow offsetX={glowX} offsetY={glowY} />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 md:grid-cols-[1.1fr_1fr]">
         <motion.div
