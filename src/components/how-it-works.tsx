@@ -7,7 +7,7 @@ import { steps } from "@/data/how-it-works";
 const stepNumber = (index: number) => String(index + 1).padStart(2, "0");
 
 export const HowItWorks = () => (
-  <section id="how" className="scroll-mt-20 py-16 md:py-24">
+  <section id="how" className="scroll-mt-24 py-16 md:py-24">
     <div className="mx-auto max-w-6xl px-4 sm:px-6">
       <p className="text-muted text-xs font-semibold tracking-[0.2em] uppercase">Як це працює</p>
       <h2 className="font-display mt-3 max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">

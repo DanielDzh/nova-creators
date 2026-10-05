@@ -84,7 +84,7 @@ export const ProfileSheet = ({ creator, initialTab = "feed", onClose }: ProfileS
         onDragEnd={handleDragEnd}
         {...sheetSlide}
         style={{ "--accent": creator.accent } as CSSProperties}
-        className="border-line bg-surface relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] border max-md:shadow-[0_100vh_0_0_var(--color-surface)] md:h-[min(780px,90dvh)] md:max-w-[460px] md:rounded-[32px]"
+        className="border-line bg-surface relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] border md:h-[min(780px,90dvh)] md:max-w-[460px] md:rounded-[32px]"
       >
         <div
           onPointerDown={handleHandlePointerDown}
