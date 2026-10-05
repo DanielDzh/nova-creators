@@ -3,10 +3,10 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { AnimatePresence } from "motion/react";
 import { creators, type Creator } from "@/data/creators";
-import { ProfileSheet } from "./profile-sheet";
+import { ProfileSheet, type ProfileTab } from "./profile-sheet";
 
 type ProfileContextValue = {
-  openProfile: (slug: string) => void;
+  openProfile: (slug: string, tab?: ProfileTab) => void;
 };
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
@@ -18,10 +18,11 @@ export function useProfile() {
 }
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState<Creator | null>(null);
+  const [active, setActive] = useState<{ creator: Creator; tab: ProfileTab } | null>(null);
 
-  const openProfile = useCallback((slug: string) => {
-    setActive(creators.find((creator) => creator.slug === slug) ?? null);
+  const openProfile = useCallback((slug: string, tab: ProfileTab = "feed") => {
+    const creator = creators.find((item) => item.slug === slug);
+    setActive(creator ? { creator, tab } : null);
   }, []);
 
   return (
@@ -29,7 +30,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       {children}
       <AnimatePresence>
         {active && (
-          <ProfileSheet key={active.slug} creator={active} onClose={() => setActive(null)} />
+          <ProfileSheet
+            key={active.creator.slug}
+            creator={active.creator}
+            initialTab={active.tab}
+            onClose={() => setActive(null)}
+          />
         )}
       </AnimatePresence>
     </ProfileContext.Provider>

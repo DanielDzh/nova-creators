@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useMotionValue, useReducedMotion } from "motion/react";
 import { creators } from "@/data/creators";
 import { HeroGlow } from "./hero-glow";
+import { HeroLiveChat } from "./hero-live-chat";
 import { HeroMarquee } from "./hero-marquee";
 import { ArrowIcon } from "./icons";
 import { TelegramButton } from "./telegram-button";
@@ -93,7 +94,10 @@ export function HeroSection() {
           </div>
         </motion.div>
 
-        <HeroMarquee />
+        <div className="relative mx-auto w-full max-w-[460px]">
+          <HeroMarquee />
+          <HeroLiveChat />
+        </div>
       </div>
     </section>
   );

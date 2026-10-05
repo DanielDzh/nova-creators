@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useDragControls, type PanInfo } from "motion/react";
 import type { Creator } from "@/data/creators";
@@ -10,22 +10,34 @@ import { CloseIcon, HeartIcon, SparkIcon } from "./icons";
 import { StoryViewer } from "./story-viewer";
 import { TelegramButton } from "./telegram-button";
 
+export type ProfileTab = "feed" | "chat";
+
 type ProfileSheetProps = {
   creator: Creator;
+  initialTab?: ProfileTab;
   onClose: () => void;
 };
 
-type Tab = "feed" | "chat";
-
-const tabs: { id: Tab; label: string }[] = [
+const tabs: { id: ProfileTab; label: string }[] = [
   { id: "feed", label: "Стрічка" },
   { id: "chat", label: "Чат" },
 ];
 
-export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
-  const [tab, setTab] = useState<Tab>("feed");
+export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileSheetProps) {
+  const [tab, setTab] = useState<ProfileTab>(initialTab);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
   const dragControls = useDragControls();
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  // Opened straight into the chat: bring the tabs into view once the sheet has slid in.
+  useEffect(() => {
+    if (initialTab !== "chat") return;
+    const timer = setTimeout(
+      () => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      450,
+    );
+    return () => clearTimeout(timer);
+  }, [initialTab]);
 
   useEffect(() => {
     const { overflow } = document.body.style;
@@ -152,7 +164,10 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
 
             <TelegramButton label="Написати в Telegram" className="mt-6 w-full" />
 
-            <div className="bg-surface/90 sticky top-0 z-[5] -mx-5 mt-8 px-5 backdrop-blur-md">
+            <div
+              ref={tabsRef}
+              className="bg-surface/90 sticky top-0 z-[5] -mx-5 mt-8 px-5 backdrop-blur-md"
+            >
               <div className="border-line flex border-b" role="tablist">
                 {tabs.map((item) => (
                   <button
