@@ -83,7 +83,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
       >
         <div
           onPointerDown={(event) => dragControls.start(event)}
-          className="absolute inset-x-0 top-0 z-10 flex h-8 cursor-grab touch-none justify-center pt-3 active:cursor-grabbing"
+          className="absolute inset-x-0 top-0 z-10 flex h-10 cursor-grab touch-none justify-center pt-3 active:cursor-grabbing"
         >
           <span className="h-1.5 w-12 rounded-full bg-white/30" />
         </div>
@@ -97,12 +97,9 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
         </button>
 
         <div className="no-scrollbar flex-1 overflow-y-auto overscroll-contain">
-          <div
-            onPointerDown={(event) => dragControls.start(event)}
-            className="relative h-32 touch-none bg-[radial-gradient(120%_120%_at_50%_0%,var(--accent),transparent_70%)] opacity-60"
-          />
+          <div className="relative h-32 bg-[radial-gradient(120%_120%_at_50%_0%,var(--accent),transparent_70%)] opacity-60" />
 
-          <div className="-mt-16 px-5 pb-8">
+          <div className="-mt-16 px-5 pb-[calc(2rem+env(safe-area-inset-bottom))]">
             <button
               type="button"
               onClick={() => setStoryIndex(0)}
@@ -191,7 +188,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
                   className="mt-4 grid grid-cols-2 gap-2"
                 >
                   {creator.posts.map((post, index) => (
-                    <li key={post.image}>
+                    <li key={post.image.src}>
                       <button
                         type="button"
                         onClick={() => setStoryIndex(index)}
@@ -203,6 +200,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
                           alt={post.caption}
                           fill
                           sizes="(min-width: 768px) 210px, 46vw"
+                          placeholder="blur"
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         <span className="absolute inset-x-0 bottom-0 flex items-center gap-1 bg-linear-to-t from-black/70 to-transparent p-2.5 pt-8 text-xs font-semibold">
