@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { creators } from "@/data/creators";
 import { CreatorCard } from "./creator-card";
@@ -11,14 +11,55 @@ export function CreatorsSection() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleScroll = () => {
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const frameRef = useRef(0);
+
+  // Mobile coverflow: the centred card stays in front, neighbours shrink, turn and dim.
+  // Styles are written straight to the DOM so swiping never re-renders React.
+  const applyCoverflow = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
-    const card = track.firstElementChild as HTMLElement | null;
-    if (!card) return;
-    const step = card.offsetWidth + 16;
-    setActiveIndex(Math.min(creators.length - 1, Math.round(track.scrollLeft / step)));
+    const isCarousel = window.matchMedia("(max-width: 639px)").matches;
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let closest = 0;
+    let closestDistance = Infinity;
+
+    cardRefs.current.forEach((card, index) => {
+      const slide = card?.parentElement;
+      if (!card || !slide) return;
+      const distance = (slide.offsetLeft + slide.offsetWidth / 2 - center) / slide.offsetWidth;
+      if (Math.abs(distance) < closestDistance) {
+        closestDistance = Math.abs(distance);
+        closest = index;
+      }
+      if (!isCarousel) {
+        card.style.transform = "";
+        card.style.filter = "";
+        return;
+      }
+      const clamped = Math.max(-1, Math.min(1, distance));
+      const amount = Math.abs(clamped);
+      card.style.transform = `perspective(900px) rotateY(${clamped * -14}deg) scale(${1 - amount * 0.1})`;
+      card.style.filter = `brightness(${1 - amount * 0.45})`;
+    });
+
+    setActiveIndex(closest);
+  }, []);
+
+  const handleScroll = () => {
+    cancelAnimationFrame(frameRef.current);
+    frameRef.current = requestAnimationFrame(applyCoverflow);
   };
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(applyCoverflow);
+    window.addEventListener("resize", applyCoverflow);
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(frameRef.current);
+      window.removeEventListener("resize", applyCoverflow);
+    };
+  }, [applyCoverflow]);
 
   const scrollTo = (index: number) => {
     const card = trackRef.current?.children[index] as HTMLElement | undefined;
@@ -44,11 +85,14 @@ export function CreatorsSection() {
         viewport={{ once: true, amount: 0.2 }}
         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
         onScroll={handleScroll}
-        className="no-scrollbar mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[9vw] pb-4 sm:mx-auto sm:grid sm:max-w-6xl sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-6 lg:grid-cols-4"
+        className="no-scrollbar relative mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[calc(50vw-min(36vw,150px))] py-4 sm:mx-auto sm:grid sm:max-w-6xl sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-6 lg:grid-cols-4"
       >
-        {creators.map((creator) => (
+        {creators.map((creator, index) => (
           <CreatorCard
             key={creator.slug}
+            ref={(node) => {
+              cardRefs.current[index] = node;
+            }}
             creator={creator}
             onOpen={() => openProfile(creator.slug)}
           />
