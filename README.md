@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NOVA — AI-блогери з характером
 
-## Getting Started
+Мобільна вітрина цифрових креаторів: чотири віртуальні блогери з власним стилем, стрічкою, сторіз і демо-чатом. Користувач знайомиться з персонажем прямо на сторінці й переходить у Telegram, щоб продовжити спілкування.
 
-First, run the development server:
+**Демо:** _посилання з'явиться після деплою_
+
+## Можливості
+
+- **Hero** — дві стрічки фото креаторів, що пливуть назустріч одна одній та «живий» чат з індикатором набору.
+- **Каталог креаторів** — coverflow-карусель на смартфоні (центральна картка попереду, сусідні повернуті й притемнені, усе прив'язано до пальця), сітка на планшеті й десктопі.
+- **Профіль у bottom sheet** — статистика, біо, теги; закривається свайпом вниз, кліком по фону або `Esc`.
+- **Сторіз** — повноекранний перегляд з прогрес-барами, автоперемиканням, паузою на утриманні, навігацією тапами й стрілками; подвійний тап — лайк, свайп вниз — закрити.
+- **Демо-чат** — сценарний діалог з індикатором набору тексту та швидкими відповідями; наприкінці пропонує продовжити розмову в Telegram.
+- **CTA «Перейти в Telegram»** — у шапці, hero, профілі, сторіз, чаті, фінальному блоці та в липкій панелі на мобільному.
+- Анімації на [Motion](https://motion.dev), підтримка `prefers-reduced-motion`, safe-area для iPhone.
+
+## Персонажі
+
+| Креатор        | Нікнейм       | Тематика                           |
+| -------------- | ------------- | ---------------------------------- |
+| Марк Левчук    | @mark.daily   | Lifestyle: кав'ярні, плівка, міста |
+| Артем Ковальов | @artem.builds | Технології та бізнес               |
+| Віра Соколова  | @vira.mode    | Мода та стиль                      |
+| Олеся Ярема    | @olesia.wild  | Спорт і подорожі                   |
+
+Портрети та пости згенеровано в Google Flow. Щоб обличчя лишалося впізнаваним у всіх постах, портрет персонажа використано як референс для кожного поста.
+
+## Стек
+
+- [Next.js 16](https://nextjs.org) (App Router) + React 19 + TypeScript
+- [Tailwind CSS 4](https://tailwindcss.com)
+- [Motion](https://motion.dev) для анімацій і жестів
+- `next/image` для оптимізації зображень, `next/font` (Unbounded + Manrope з кирилицею)
+- ESLint + Prettier (з `prettier-plugin-tailwindcss`)
+
+## Запуск
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Скрипт              | Що робить                              |
+| ------------------- | -------------------------------------- |
+| `pnpm dev`          | дев-сервер                             |
+| `pnpm build`        | продакшн-збірка                        |
+| `pnpm start`        | запуск збірки                          |
+| `pnpm lint`         | ESLint                                 |
+| `pnpm format`       | Prettier — форматування всього проєкту |
+| `pnpm format:check` | Prettier — перевірка без змін          |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Структура
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                  # layout, сторінка, глобальні стилі й токени
+├── components/           # секції та інтерактивні компоненти
+│   ├── profile-provider  # контекст відкриття профілю
+│   ├── profile-sheet     # bottom sheet профілю зі стрічкою та чатом
+│   ├── story-viewer      # повноекранні сторіз
+│   └── chat-demo         # сценарний демо-діалог
+├── data/creators.ts      # контент: персонажі, пости, сценарії чату
+└── lib/                  # утиліти
+src/assets/creators/<slug>/ # avatar.jpg, post-1.jpg, post-2.jpg
+```
 
-## Learn More
+## Як додати креатора
 
-To learn more about Next.js, take a look at the following resources:
+1. Поклади зображення в `src/assets/creators/<slug>/`: `avatar.jpg`, `post-1.jpg` і `post-2.jpg` (пропорція 3:4).
+2. Імпортуй їх у `src/data/creators.ts` і додай об'єкт у масив `creators`: ім'я, нікнейм, тематику, акцентний колір, пости та сценарій чату.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Зображення підключені через static imports: Next.js додає до URL хеш вмісту, тож після заміни файлу користувачі одразу бачать нову версію, а не закешовану.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Решта інтерфейсу підхопить нового персонажа автоматично.
 
-## Deploy on Vercel
+## Гілки
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `main` — стабільна версія, з неї деплоїться продакшн
+- `develop` — інтеграційна гілка, сюди вливаються feature-гілки через PR
