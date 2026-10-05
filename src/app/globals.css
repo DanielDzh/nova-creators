@@ -54,6 +54,12 @@
     @apply bg-ink font-sans text-white antialiased;
   }
 
+  /* Tailwind 4 preflight no longer gives buttons a pointer cursor. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
   ::selection {
     @apply text-ink bg-white;
   }
