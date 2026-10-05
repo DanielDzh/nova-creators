@@ -3,7 +3,7 @@ import { TelegramButton } from "./telegram-button";
 
 export function SiteHeader() {
   return (
-    <header className="border-line bg-ink/70 fixed inset-x-0 top-0 z-40 border-b backdrop-blur-xl">
+    <header className="border-line bg-ink/70 fixed inset-x-0 top-0 z-40 border-b pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <a href="#top" className="flex items-center gap-2" aria-label="NOVA — на початок">
           <SparkIcon className="size-5 text-white" />
