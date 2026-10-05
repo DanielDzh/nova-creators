@@ -75,7 +75,7 @@ export function CreatorsSection() {
   };
 
   return (
-    <section id="creators" className="relative isolate scroll-mt-20 py-16 md:py-24">
+    <section id="creators" className="relative isolate scroll-mt-20 overflow-x-clip py-16 md:py-24">
       {/* Ambient glow in the accent colour of the creator in focus. */}
       <div
         aria-hidden="true"
