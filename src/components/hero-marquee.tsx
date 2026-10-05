@@ -60,7 +60,7 @@ function MarqueeTile({ tile, hidden }: { tile: Tile; hidden: boolean }) {
       aria-label={`Відкрити профіль: ${creator.name}`}
       aria-hidden={hidden || undefined}
       tabIndex={hidden ? -1 : undefined}
-      className="group/tile border-line relative block aspect-[3/4] w-full shrink-0 overflow-hidden rounded-3xl border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      className="group/tile border-line relative block aspect-[3/4] w-full shrink-0 overflow-hidden rounded-3xl border transition-[scale] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-[0.96]"
     >
       <Image
         src={tile.image}
