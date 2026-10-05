@@ -3,9 +3,10 @@ import { navLinks } from "@/data/navigation";
 import { SparkIcon } from "./icons";
 import { TelegramButton } from "./telegram-button";
 
+/** Floating glass capsule: it sits clear of the screen edges, so iOS glass bars never leave a seam. */
 export const SiteHeader = () => (
-  <header className="bleed-top bg-ink/45 fixed inset-x-0 top-0 z-40 border-b border-white/10 pt-[env(safe-area-inset-top)] backdrop-blur-2xl">
-    <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+  <header className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+0.75rem)] z-40 sm:inset-x-6">
+    <div className="bg-ink/55 mx-auto flex h-14 max-w-6xl items-center justify-between rounded-full border border-white/10 pr-2 pl-5 shadow-[0_12px_40px_-12px_rgb(0_0_0/0.7)] backdrop-blur-2xl">
       <a
         href="#top"
         className="flex items-center gap-2"
