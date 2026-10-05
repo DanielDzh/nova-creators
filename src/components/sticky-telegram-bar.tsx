@@ -31,7 +31,7 @@ export const StickyTelegramBar = () => {
       {visible && (
         <motion.div
           {...stickyBarSlide}
-          className="from-ink via-ink/90 fixed inset-x-0 bottom-0 z-30 bg-linear-to-t to-transparent px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
+          className="bleed-bottom from-ink via-ink/90 fixed inset-x-0 bottom-0 z-30 bg-linear-to-t to-transparent px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden"
         >
           <TelegramButton className="w-full" />
         </motion.div>

@@ -73,6 +73,36 @@
   }
 }
 
+/*
+ * Extend a fixed bar's background past the screen edge. On iOS Safari the page
+ * scrolls under the translucent browser chrome, so a bar pinned to the visible
+ * edge would otherwise leave a strip of moving content between it and the glass.
+ */
+@utility bleed-top {
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 100%;
+    height: 100vh;
+    background: inherit;
+    backdrop-filter: inherit;
+    pointer-events: none;
+  }
+}
+
+@utility bleed-bottom {
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 100vh;
+    background: var(--color-ink);
+    pointer-events: none;
+  }
+}
+
 /* Subtle film grain over the whole page */
 @utility grain {
   &::after {
