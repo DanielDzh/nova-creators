@@ -83,7 +83,7 @@ export function HeroSection() {
           </div>
         </motion.div>
 
-        <div className="relative mx-auto aspect-[5/3] w-full max-w-[460px]">
+        <div className="relative mx-auto aspect-[3/2] w-full max-w-[460px]">
           {creators.map((creator, index) => {
             const pose = fan[index];
             return (
@@ -103,7 +103,7 @@ export function HeroSection() {
                   delay: 0.2 + index * 0.08,
                 }}
                 style={{ zIndex: pose.z, left: pose.left }}
-                className="absolute top-0 aspect-[4/5] w-[42%] cursor-pointer overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/60"
+                className="absolute top-0 aspect-[3/4] w-[42%] cursor-pointer overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/60"
               >
                 <Image
                   src={creator.avatar}

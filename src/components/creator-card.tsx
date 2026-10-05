@@ -24,7 +24,7 @@ export function CreatorCard({ creator, onOpen }: CreatorCardProps) {
       <button
         type="button"
         onClick={onOpen}
-        className="border-line relative block aspect-[4/5] w-full overflow-hidden rounded-[28px] border text-left transition-shadow duration-500 group-hover:shadow-[0_24px_60px_-20px_var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+        className="border-line relative block aspect-[3/4] w-full overflow-hidden rounded-[28px] border text-left transition-shadow duration-500 group-hover:shadow-[0_24px_60px_-20px_var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
         aria-label={`Відкрити профіль: ${creator.name}`}
       >
         <Image
