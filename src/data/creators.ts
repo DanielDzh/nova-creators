@@ -1,7 +1,21 @@
+import type { StaticImageData } from "next/image";
+import markAvatar from "@/assets/creators/mark/avatar.jpg";
+import markPost1 from "@/assets/creators/mark/post-1.jpg";
+import markPost2 from "@/assets/creators/mark/post-2.jpg";
+import artemAvatar from "@/assets/creators/artem/avatar.jpg";
+import artemPost1 from "@/assets/creators/artem/post-1.jpg";
+import artemPost2 from "@/assets/creators/artem/post-2.jpg";
+import viraAvatar from "@/assets/creators/vira/avatar.jpg";
+import viraPost1 from "@/assets/creators/vira/post-1.jpg";
+import viraPost2 from "@/assets/creators/vira/post-2.jpg";
+import olesiaAvatar from "@/assets/creators/olesia/avatar.jpg";
+import olesiaPost1 from "@/assets/creators/olesia/post-1.jpg";
+import olesiaPost2 from "@/assets/creators/olesia/post-2.jpg";
+
 export const TELEGRAM_URL = "https://t.me/danone_dz";
 
 export type Post = {
-  image: string;
+  image: StaticImageData;
   caption: string;
   likes: number;
   location?: string;
@@ -19,7 +33,7 @@ export type Creator = {
   niche: string;
   tagline: string;
   bio: string;
-  avatar: string;
+  avatar: StaticImageData;
   accent: string;
   followers: string;
   postsCount: number;
@@ -30,8 +44,8 @@ export type Creator = {
   quickReplies: QuickReply[];
 };
 
-const postsOf = (slug: string, items: Omit<Post, "image">[]): Post[] =>
-  items.map((item, index) => ({ ...item, image: `/bloggers/${slug}/post-${index + 1}.jpg` }));
+const postsOf = (images: StaticImageData[], items: Omit<Post, "image">[]): Post[] =>
+  items.map((item, index) => ({ ...item, image: images[index] }));
 
 export const creators: Creator[] = [
   {
@@ -41,24 +55,27 @@ export const creators: Creator[] = [
     niche: "Lifestyle",
     tagline: "Повільні ранки, плівка й міста, в які хочеться повернутися",
     bio: "Колекціоную кав'ярні, вінілові платівки та маленькі радощі буднів. Підкажу, куди сходити на вихідних і як не загубити себе в рутині.",
-    avatar: "/bloggers/mark/avatar.jpg",
+    avatar: markAvatar,
     accent: "#F5B971",
     followers: "248K",
     postsCount: 612,
     responseTime: "~1 хв",
     tags: ["кав'ярні", "плівка", "міські прогулянки"],
-    posts: postsOf("mark", [
-      {
-        caption: "Флет вайт і нікуди не поспішати. Ідеальний вівторок ☕",
-        likes: 18420,
-        location: "Львів",
-      },
-      {
-        caption: "Бруківка, захід сонця і 36 кадрів, які я ще не проявив",
-        likes: 22310,
-        location: "Прага",
-      },
-    ]),
+    posts: postsOf(
+      [markPost1, markPost2],
+      [
+        {
+          caption: "Флет вайт і нікуди не поспішати. Ідеальний вівторок ☕",
+          likes: 18420,
+          location: "Львів",
+        },
+        {
+          caption: "Бруківка, захід сонця і 36 кадрів, які я ще не проявив",
+          likes: 22310,
+          location: "Прага",
+        },
+      ],
+    ),
     greeting: ["Привіт! 👋 Я Марк.", "Щойно повернувся з ранкової прогулянки. Про що поговоримо?"],
     quickReplies: [
       {
@@ -91,20 +108,23 @@ export const creators: Creator[] = [
     niche: "Tech & Business",
     tagline: "Будую продукти з AI і чесно розповідаю, що працює, а що ні",
     bio: "Фаундер, ментор і трохи нерд. Розбираю AI-інструменти, продуктові метрики та помилки, які коштували мені грошей, — щоб вони не коштували тобі.",
-    avatar: "/bloggers/artem/avatar.jpg",
+    avatar: artemAvatar,
     accent: "#7CC4FF",
     followers: "184K",
     postsCount: 438,
     responseTime: "~2 хв",
     tags: ["AI", "стартапи", "продуктивність"],
-    posts: postsOf("artem", [
-      {
-        caption: "20 хвилин на сцені, 3 місяці підготовки. Слайди — в Telegram 🎤",
-        likes: 12980,
-        location: "Web Summit",
-      },
-      { caption: "Нічний деплой — традиція, яку я не рекомендую 😅", likes: 9874 },
-    ]),
+    posts: postsOf(
+      [artemPost1, artemPost2],
+      [
+        {
+          caption: "20 хвилин на сцені, 3 місяці підготовки. Слайди — в Telegram 🎤",
+          likes: 12980,
+          location: "Web Summit",
+        },
+        { caption: "Нічний деплой — традиція, яку я не рекомендую 😅", likes: 9874 },
+      ],
+    ),
     greeting: ["Привіт, я Артем 👨‍💻", "Питай про AI, продукт чи запуск — відповідаю без води."],
     quickReplies: [
       {
@@ -137,20 +157,23 @@ export const creators: Creator[] = [
     niche: "Fashion",
     tagline: "Мінімалізм, якісні речі й стиль, що не залежить від трендів",
     bio: "Стилістка та авторка капсульних гардеробів. Вчу одягатися так, щоб збори займали 5 хвилин, а компліменти лунали весь день.",
-    avatar: "/bloggers/vira/avatar.jpg",
+    avatar: viraAvatar,
     accent: "#FF7A8A",
     followers: "412K",
     postsCount: 905,
     responseTime: "~1 хв",
     tags: ["капсула", "street style", "beauty"],
-    posts: postsOf("vira", [
-      {
-        caption: "Пальто кольору кемел — інвестиція на десять сезонів",
-        likes: 41230,
-        location: "Париж",
-      },
-      { caption: "Шовк, тиша ательє і сукня, на яку я чекала пів року", likes: 36780 },
-    ]),
+    posts: postsOf(
+      [viraPost1, viraPost2],
+      [
+        {
+          caption: "Пальто кольору кемел — інвестиція на десять сезонів",
+          likes: 41230,
+          location: "Париж",
+        },
+        { caption: "Шовк, тиша ательє і сукня, на яку я чекала пів року", likes: 36780 },
+      ],
+    ),
     greeting: ["Привіт, красуне чи красеню 💋", "Я Віра. Розберемо твій гардероб?"],
     quickReplies: [
       {
@@ -183,20 +206,23 @@ export const creators: Creator[] = [
     niche: "Sport & Travel",
     tagline: "Гори, океан і кілометри, після яких хочеться жити голосніше",
     bio: "Трейлраннерка, серферка й авторка маршрутів. Покажу, як почати бігати, куди поїхати з наметом і чому світанок у горах вартий будильника о 4:00.",
-    avatar: "/bloggers/olesia/avatar.jpg",
+    avatar: olesiaAvatar,
     accent: "#9BE15D",
     followers: "326K",
     postsCount: 741,
     responseTime: "~3 хв",
     tags: ["трейлраннінг", "серфінг", "походи"],
-    posts: postsOf("olesia", [
-      {
-        caption: "2061 метр над рівнем моря і жодної хмаринки під ногами ⛰️",
-        likes: 33410,
-        location: "Говерла",
-      },
-      { caption: "Хвиля перемогла, але завтра реванш 🏄‍♀️", likes: 28976, location: "Португалія" },
-    ]),
+    posts: postsOf(
+      [olesiaPost1, olesiaPost2],
+      [
+        {
+          caption: "2061 метр над рівнем моря і жодної хмаринки під ногами ⛰️",
+          likes: 33410,
+          location: "Говерла",
+        },
+        { caption: "Хвиля перемогла, але завтра реванш 🏄‍♀️", likes: 28976, location: "Португалія" },
+      ],
+    ),
     greeting: ["Хей! 🏔️ Я Олеся.", "Щойно з пробіжки. Плануєш пригоду?"],
     quickReplies: [
       {

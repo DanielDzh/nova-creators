@@ -32,6 +32,7 @@ export function CreatorCard({ creator, onOpen }: CreatorCardProps) {
           alt={`${creator.name} — ${creator.niche}`}
           fill
           sizes="(min-width: 1024px) 270px, (min-width: 640px) 45vw, 82vw"
+          placeholder="blur"
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <span className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-transparent" />

@@ -110,6 +110,7 @@ export function HeroSection() {
                   alt={creator.name}
                   fill
                   sizes="(min-width: 768px) 200px, 42vw"
+                  placeholder="blur"
                   className="object-cover"
                   priority
                 />

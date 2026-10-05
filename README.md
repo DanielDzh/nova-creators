@@ -60,13 +60,15 @@ src/
 │   └── chat-demo         # сценарний демо-діалог
 ├── data/creators.ts      # контент: персонажі, пости, сценарії чату
 └── lib/                  # утиліти
-public/bloggers/<slug>/   # avatar.jpg, post-1.jpg, post-2.jpg
+src/assets/creators/<slug>/ # avatar.jpg, post-1.jpg, post-2.jpg
 ```
 
 ## Як додати креатора
 
-1. Поклади зображення в `public/bloggers/<slug>/`: `avatar.jpg`, `post-1.jpg` і `post-2.jpg` (пропорція 3:4).
-2. Додай об'єкт у масив `creators` у `src/data/creators.ts`: ім'я, нікнейм, тематику, акцентний колір, пости та сценарій чату.
+1. Поклади зображення в `src/assets/creators/<slug>/`: `avatar.jpg`, `post-1.jpg` і `post-2.jpg` (пропорція 3:4).
+2. Імпортуй їх у `src/data/creators.ts` і додай об'єкт у масив `creators`: ім'я, нікнейм, тематику, акцентний колір, пости та сценарій чату.
+
+Зображення підключені через static imports: Next.js додає до URL хеш вмісту, тож після заміни файлу користувачі одразу бачать нову версію, а не закешовану.
 
 Решта інтерфейсу підхопить нового персонажа автоматично.
 

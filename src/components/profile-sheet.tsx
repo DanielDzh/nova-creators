@@ -191,7 +191,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
                   className="mt-4 grid grid-cols-2 gap-2"
                 >
                   {creator.posts.map((post, index) => (
-                    <li key={post.image}>
+                    <li key={post.image.src}>
                       <button
                         type="button"
                         onClick={() => setStoryIndex(index)}
@@ -203,6 +203,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
                           alt={post.caption}
                           fill
                           sizes="(min-width: 768px) 210px, 46vw"
+                          placeholder="blur"
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         <span className="absolute inset-x-0 bottom-0 flex items-center gap-1 bg-linear-to-t from-black/70 to-transparent p-2.5 pt-8 text-xs font-semibold">

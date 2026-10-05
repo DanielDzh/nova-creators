@@ -67,7 +67,7 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
       <div className="relative h-dvh w-full overflow-hidden md:h-[min(860px,94dvh)] md:max-w-[440px] md:rounded-[28px]">
         <AnimatePresence initial={false}>
           <motion.div
-            key={post.image}
+            key={post.image.src}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -79,6 +79,7 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
               alt={post.caption}
               fill
               sizes="(min-width: 768px) 440px, 100vw"
+              placeholder="blur"
               className="object-cover"
               priority
             />
@@ -90,7 +91,7 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
           <div className="flex gap-1">
             {creator.posts.map((item, itemIndex) => (
               <div
-                key={item.image}
+                key={item.image.src}
                 className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/30"
               >
                 <div
