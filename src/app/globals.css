@@ -13,6 +13,16 @@
   --font-display: var(--font-unbounded), ui-sans-serif, system-ui, sans-serif;
 
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-marquee-up: marquee-up 60s linear infinite;
+
+  @keyframes marquee-up {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-50%);
+    }
+  }
 
   @keyframes pulse-dot {
     0%,
@@ -37,11 +47,18 @@
 @layer base {
   html {
     color-scheme: dark;
+    scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-ink font-sans text-white antialiased;
+  }
+
+  /* Tailwind 4 preflight no longer gives buttons a pointer cursor. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
   }
 
   ::selection {
@@ -70,6 +87,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useDragControls, type PanInfo } from "motion/react";
 import type { Creator } from "@/data/creators";
@@ -10,22 +10,34 @@ import { CloseIcon, HeartIcon, SparkIcon } from "./icons";
 import { StoryViewer } from "./story-viewer";
 import { TelegramButton } from "./telegram-button";
 
+export type ProfileTab = "feed" | "chat";
+
 type ProfileSheetProps = {
   creator: Creator;
+  initialTab?: ProfileTab;
   onClose: () => void;
 };
 
-type Tab = "feed" | "chat";
-
-const tabs: { id: Tab; label: string }[] = [
+const tabs: { id: ProfileTab; label: string }[] = [
   { id: "feed", label: "Стрічка" },
   { id: "chat", label: "Чат" },
 ];
 
-export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
-  const [tab, setTab] = useState<Tab>("feed");
+export function ProfileSheet({ creator, initialTab = "feed", onClose }: ProfileSheetProps) {
+  const [tab, setTab] = useState<ProfileTab>(initialTab);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
   const dragControls = useDragControls();
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  // Opened straight into the chat: bring the tabs into view once the sheet has slid in.
+  useEffect(() => {
+    if (initialTab !== "chat") return;
+    const timer = setTimeout(
+      () => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      450,
+    );
+    return () => clearTimeout(timer);
+  }, [initialTab]);
 
   useEffect(() => {
     const { overflow } = document.body.style;
@@ -60,7 +72,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        exit={{ opacity: 0, transition: { duration: 0.25 } }}
         onClick={onClose}
       />
 
@@ -76,7 +88,8 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
         onDragEnd={handleDragEnd}
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        exit={{ y: "100%" }}
+        // Closing uses a short tween: a spring's long settle tail made the sheet linger at the bottom.
+        exit={{ y: "100%", transition: { duration: 0.3, ease: [0.32, 0.72, 0, 1] } }}
         transition={{ type: "spring", stiffness: 320, damping: 34 }}
         style={{ "--accent": creator.accent } as CSSProperties}
         className="border-line bg-surface relative flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] border md:h-[min(780px,90dvh)] md:max-w-[460px] md:rounded-[32px]"
@@ -97,9 +110,7 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
         </button>
 
         <div className="no-scrollbar flex-1 overflow-y-auto overscroll-contain">
-          <div className="relative h-32 bg-[radial-gradient(120%_120%_at_50%_0%,var(--accent),transparent_70%)] opacity-60" />
-
-          <div className="-mt-16 px-5 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+          <div className="px-5 pt-12 pb-[calc(2rem+env(safe-area-inset-bottom))]">
             <button
               type="button"
               onClick={() => setStoryIndex(0)}
@@ -152,7 +163,10 @@ export function ProfileSheet({ creator, onClose }: ProfileSheetProps) {
 
             <TelegramButton label="Написати в Telegram" className="mt-6 w-full" />
 
-            <div className="bg-surface/90 sticky top-0 z-[5] -mx-5 mt-8 px-5 backdrop-blur-md">
+            <div
+              ref={tabsRef}
+              className="bg-surface/90 sticky top-0 z-[5] -mx-5 mt-8 px-5 backdrop-blur-md"
+            >
               <div className="border-line flex border-b" role="tablist">
                 {tabs.map((item) => (
                   <button

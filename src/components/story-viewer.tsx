@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type PanInfo } from "motion/react";
 import type { Creator } from "@/data/creators";
 import { formatCount } from "@/lib/format";
 import { CloseIcon, HeartIcon, PinIcon } from "./icons";
 import { TelegramButton } from "./telegram-button";
 
 const STORY_DURATION_MS = 5000;
+const DOUBLE_TAP_MS = 260;
 
 type StoryViewerProps = {
   creator: Creator;
@@ -49,8 +50,42 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
     else {
       updated.add(index);
       setBurstKey((key) => key + 1);
+      navigator.vibrate?.(12);
     }
     setLiked(updated);
+  };
+
+  // Double tap likes (like in Instagram); a single tap navigates after a short wait.
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draggedRef = useRef(false);
+
+  useEffect(() => () => clearTimeout(tapTimerRef.current ?? undefined), []);
+
+  const handleTap = (direction: "prev" | "next", event: MouseEvent) => {
+    if (draggedRef.current) return;
+    const navigate = direction === "next" ? next : prev;
+    // Keyboard activation (detail === 0) navigates straight away.
+    if (event.detail === 0) return navigate();
+
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current);
+      tapTimerRef.current = null;
+      if (!isLiked) toggleLike();
+      else setBurstKey((key) => key + 1);
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => {
+      tapTimerRef.current = null;
+      navigate();
+    }, DOUBLE_TAP_MS);
+  };
+
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    if (info.offset.y > 120 || info.velocity.y > 600) onClose();
+    // Let the click that follows a drag pass without navigating.
+    setTimeout(() => {
+      draggedRef.current = false;
+    }, 0);
   };
 
   return (
@@ -64,7 +99,16 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
       transition={{ duration: 0.25 }}
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black md:bg-black/90 md:backdrop-blur-lg"
     >
-      <div className="relative h-dvh w-full overflow-hidden md:h-[min(860px,94dvh)] md:max-w-[440px] md:rounded-[28px]">
+      <motion.div
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.8 }}
+        onDragStart={() => {
+          draggedRef.current = true;
+        }}
+        onDragEnd={handleDragEnd}
+        className="relative h-dvh w-full overflow-hidden md:h-[min(860px,94dvh)] md:max-w-[440px] md:rounded-[28px]"
+      >
         <AnimatePresence initial={false}>
           <motion.div
             key={post.image.src}
@@ -147,12 +191,22 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
           onPointerUp={() => setPaused(false)}
           onPointerLeave={() => setPaused(false)}
         >
-          <button type="button" aria-label="Попередня" className="w-1/3" onClick={prev} />
-          <button type="button" aria-label="Наступна" className="flex-1" onClick={next} />
+          <button
+            type="button"
+            aria-label="Попередня"
+            className="w-1/3"
+            onClick={(event) => handleTap("prev", event)}
+          />
+          <button
+            type="button"
+            aria-label="Наступна"
+            className="flex-1"
+            onClick={(event) => handleTap("next", event)}
+          />
         </div>
 
         <AnimatePresence>
-          {burstKey > 0 && isLiked && (
+          {burstKey > 0 && (
             <motion.div
               key={burstKey}
               initial={{ scale: 0.4, opacity: 0 }}
@@ -186,7 +240,7 @@ export function StoryViewer({ creator, startIndex, onClose }: StoryViewerProps) 
           </div>
           <TelegramButton label="Більше контенту в Telegram" className="w-full" />
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -32,7 +32,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="uk" className={`${manrope.variable} ${unbounded.variable}`}>
+    <html
+      lang="uk"
+      data-scroll-behavior="smooth"
+      className={`${manrope.variable} ${unbounded.variable}`}
+    >
       <body className="grain">{children}</body>
     </html>
   );
