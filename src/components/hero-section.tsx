@@ -12,7 +12,7 @@ import { ArrowIcon } from "./icons";
 import { TelegramButton } from "./telegram-button";
 
 export const HeroSection = () => (
-  <section id="top" className="relative overflow-hidden pt-32 pb-16 sm:pt-36 md:pb-24">
+  <section id="top" className="relative overflow-hidden pt-40 pb-16 sm:pt-36 md:pb-24">
     <div
       aria-hidden="true"
       className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(124_196_255/0.18),transparent)] blur-2xl"
